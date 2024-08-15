@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="chat-container">
+        <div id="chat-header">Real Time Chat</div>
+        <div id="username-container">
+            <input type="text" id="username" placeholder="Enter Username" />
+            <button id="joinBtn">Join Room</button>
+        </div>
+        <div id="messages"></div>
+        <div id="chat-footer" style="display: none;">
+            <input type="text" id="message" placeholder="Type Message" />
+            <button id="sendBtn">Send</button>
+        </div>
+    </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const sendBtn = document.getElementById("sendBtn");
+        const joinBtn = document.getElementById("joinBtn");
+        const messageInput = document.getElementById("message");
+        const usernameInput = document.getElementById("username");
+        const allMessages = document.getElementById("messages");
+        const chatFooter = document.getElementById("chat-footer");
+
+        socket.on("message", (data) => {
+            const p = document.createElement("p");
+            p.innerText = `${data.username}: ${data.message}`;
+            allMessages.appendChild(p);
+        });
+
+        joinBtn.addEventListener("click", (e) => {
+            const username = usernameInput.value;
+            if (username) {
+                socket.emit("join-room", { username });
+                chatFooter.style.display = "flex"; // Show the message input and send button
+            } else {
+                alert("Please enter a username.");
+            }
+        });
+
+        sendBtn.addEventListener("click", (e) => {
+            const message = messageInput.value;
+            const username = usernameInput.value;
+            if (username && message) {
+                socket.emit("user-message", { username, message });
+                messageInput.value = ''; // Clear the message input after sending
+            } else {
+                alert("Please enter a username and a message.");
+            }
+        });
+    </script>
+</body>
+</html>
